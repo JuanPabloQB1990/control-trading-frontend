@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 function OperacionDetallePage() {
   const { id } = useParams();
   const [operacion, setOperacion] = useState(null);
 
   useEffect(() => {
-    axios.get(`/api/operaciones/${id}`).then((res) => setOperacion(res.data));
+    api.get(`/operaciones/${id}`).then((res) => setOperacion(res.data));
   }, [id]);
 
   if (!operacion) return <div className="panel">Cargando...</div>;

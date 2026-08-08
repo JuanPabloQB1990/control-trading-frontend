@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 function ParesPage() {
   const [pares, setPares] = useState([]);
@@ -7,7 +7,7 @@ function ParesPage() {
   const [editingId, setEditingId] = useState(null);
 
   const fetchData = async () => {
-    const res = await axios.get('/api/pares');
+    const res = await api.get('/pares');
     setPares(res.data);
   };
 
@@ -18,9 +18,9 @@ function ParesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`/api/pares/${editingId}`, { nombre });
+      await api.put(`/pares/${editingId}`, { nombre });
     } else {
-      await axios.post('/api/pares', { nombre });
+      await api.post('/pares', { nombre });
     }
     setNombre('');
     setEditingId(null);
@@ -34,7 +34,7 @@ function ParesPage() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Deseas eliminar este par?')) return;
-    await axios.delete(`/api/pares/${id}`);
+    await api.delete(`/pares/${id}`);
     fetchData();
   };
 

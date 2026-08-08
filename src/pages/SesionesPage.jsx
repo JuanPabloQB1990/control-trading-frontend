@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 function SesionesPage() {
   const [sesiones, setSesiones] = useState([]);
@@ -7,7 +7,7 @@ function SesionesPage() {
   const [editingId, setEditingId] = useState(null);
 
   const fetchData = async () => {
-    const res = await axios.get('/api/sesiones');
+    const res = await api.get('/sesiones');
     setSesiones(res.data);
   };
 
@@ -18,9 +18,9 @@ function SesionesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`/api/sesiones/${editingId}`, { nombre });
+      await api.put(`/sesiones/${editingId}`, { nombre });
     } else {
-      await axios.post('/api/sesiones', { nombre });
+      await api.post('/sesiones', { nombre });
     }
     setNombre('');
     setEditingId(null);
@@ -34,7 +34,7 @@ function SesionesPage() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Deseas eliminar esta sesión?')) return;
-    await axios.delete(`/api/sesiones/${id}`);
+    await api.delete(`/sesiones/${id}`);
     fetchData();
   };
 

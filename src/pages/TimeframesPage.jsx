@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 function TimeframesPage() {
   const [timeframes, setTimeframes] = useState([]);
@@ -7,7 +7,7 @@ function TimeframesPage() {
   const [editingId, setEditingId] = useState(null);
 
   const fetchData = async () => {
-    const res = await axios.get('/api/timeframes');
+    const res = await api.get('/timeframes');
     setTimeframes(res.data);
   };
 
@@ -18,9 +18,9 @@ function TimeframesPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`/api/timeframes/${editingId}`, { nombre });
+      await api.put(`/timeframes/${editingId}`, { nombre });
     } else {
-      await axios.post('/api/timeframes', { nombre });
+      await api.post('/timeframes', { nombre });
     }
     setNombre('');
     setEditingId(null);
@@ -34,7 +34,7 @@ function TimeframesPage() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Deseas eliminar este timeframe?')) return;
-    await axios.delete(`/api/timeframes/${id}`);
+    await api.delete(`/timeframes/${id}`);
     fetchData();
   };
 

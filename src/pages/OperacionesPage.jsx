@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const defaultForm = {
   fechaHora: '',
@@ -59,10 +59,10 @@ function OperacionesPage() {
     try {
       setLoading(true);
       const [opsRes, sesionesRes, paresRes, timeframesRes] = await Promise.all([
-        axios.get('/api/operaciones'),
-        axios.get('/api/sesiones'),
-        axios.get('/api/pares'),
-        axios.get('/api/timeframes')
+        api.get('/operaciones'),
+        api.get('/sesiones'),
+        api.get('/pares'),
+        api.get('/timeframes')
       ]);
       setOperaciones(opsRes.data);
       setSesiones(sesionesRes.data);
@@ -99,7 +99,7 @@ function OperacionesPage() {
         try {
           const formData = new FormData();
           formData.append('image', imageFile);
-          const uploadRes = await axios.post('/api/uploads', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+          const uploadRes = await api.post('/uploads', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
           imageUrl = uploadRes.data.imageUrl;
         } catch (uploadErr) {
           console.error('Image upload failed:', uploadErr);
@@ -109,9 +109,9 @@ function OperacionesPage() {
 
       const payload = { ...form, imagenUrl: imageUrl, operacionTomada: Boolean(form.operacionTomada), pipsStopLoss: Number(form.pipsStopLoss), pipsProfit: Number(form.pipsProfit), riesgoPorcentaje: Number(form.riesgoPorcentaje), profitPorcentaje: Number(form.profitPorcentaje), pipsReliquidacion: Number(form.pipsReliquidacion), ajusteStopLossPips: Number(form.ajusteStopLossPips), pipsObjetivo: Number(form.pipsObjetivo), porcentajeObjetivo: Number(form.porcentajeObjetivo) };
       if (editingId) {
-        await axios.put(`/api/operaciones/${editingId}`, payload);
+        await api.put(`/operaciones/${editingId}`, payload);
       } else {
-        await axios.post('/api/operaciones', payload);
+        await api.post('/operaciones', payload);
       }
       setForm(defaultForm);
       setEditingId(null);
@@ -170,7 +170,7 @@ function OperacionesPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('¿Deseas eliminar esta operación?')) return;
     try {
-      await axios.delete(`/api/operaciones/${id}`);
+      await api.delete(`/operaciones/${id}`);
       await fetchData();
     } catch (err) {
       setError('No se pudo eliminar la operación');
