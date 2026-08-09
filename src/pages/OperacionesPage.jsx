@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 const defaultForm = {
@@ -49,11 +49,14 @@ function OperacionesPage() {
     reliquida: '',
     objetivoPrecio: '',
     timeframeObjetivo: '',
-    alcanzaTarget: ''
+    alcanzaTarget: '',
+    operacionTomada: '',
+    resultadoOperacion: ''
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const fetchData = async () => {
     try {
@@ -78,6 +81,15 @@ function OperacionesPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('new') === 'true') {
+      handleOpenForm();
+      const params = new URLSearchParams(searchParams);
+      params.delete('new');
+      setSearchParams(params, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -140,8 +152,14 @@ function OperacionesPage() {
   const handleEdit = (op) => {
     setEditingId(op._id);
     setShowForm(true);
+    const toBogotaInput = (dateStr) => {
+      if (!dateStr) return '';
+      const bogota = new Date(dateStr).toLocaleString('sv-SE', { timeZone: 'America/Bogota', hour12: false });
+      return bogota.replace(' ', 'T').slice(0, 16);
+    };
+
     setForm({
-      fechaHora: op.fechaHora ? new Date(op.fechaHora).toISOString().slice(0, 16) : '',
+      fechaHora: op.fechaHora ? toBogotaInput(op.fechaHora) : '',
       sesion: op.sesion?._id || op.sesion || '',
       par: op.par?._id || op.par || '',
       liquidez: op.liquidez || 'imbalance',
@@ -199,6 +217,8 @@ function OperacionesPage() {
     if (filters.objetivoPrecio && op.objetivoPrecio !== filters.objetivoPrecio) return false;
     if (filters.timeframeObjetivo && String(op.timeframeObjetivo?._id || op.timeframeObjetivo) !== String(filters.timeframeObjetivo)) return false;
     if (filters.alcanzaTarget !== '' && String(op.alcanzaTarget) !== filters.alcanzaTarget) return false;
+    if (filters.operacionTomada !== '' && String(op.operacionTomada) !== filters.operacionTomada) return false;
+    if (filters.resultadoOperacion && op.resultadoOperacion !== filters.resultadoOperacion) return false;
 
     return true;
   });
@@ -220,16 +240,19 @@ function OperacionesPage() {
     { totalProfitsNetos: 0, totalOperaciones: 0 }
   );
 
+  const porcentajeObjetivos = filteredOperaciones.reduce((acc, op) => {
+    const objetivo = Number(op.porcentajeObjetivo) || 0;
+    const riesgo = Number(op.riesgoPorcentaje) || 0;
+    if (op.alcanzaTarget) {
+      acc += objetivo;
+    } else {
+      acc -= riesgo;
+    }
+    return acc;
+  }, 0);
+
   return (
     <div>
-      {!showForm && !editingId && (
-        <div className="panel">
-          <div className="row">
-            <button onClick={handleOpenForm}>Nueva operación</button>
-          </div>
-        </div>
-      )}
-
       {(showForm || editingId) && (
         <div className="modal-backdrop" onClick={handleCloseForm}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -287,6 +310,10 @@ function OperacionesPage() {
               <p>{dashboardStats.totalProfitsNetos.toFixed(2)}%</p>
             </div>
             <div className="metric-card">
+              <h3>Porcentaje objetivos</h3>
+              <p>{porcentajeObjetivos.toFixed(2)}%</p>
+            </div>
+            <div className="metric-card">
               <h3>Operaciones</h3>
               <p>{dashboardStats.totalOperaciones}</p>
             </div>
@@ -295,7 +322,7 @@ function OperacionesPage() {
 
         <div className="panel">
           <h2 style={{ margin: '0 0 10px' }}>Filtros</h2>
-          <div className="grid">
+          <div className="filter-grid">
             <label>Desde<input name="fechaDesde" type="date" value={filters.fechaDesde} onChange={handleFilterChange} /></label>
             <label>Hasta<input name="fechaHasta" type="date" value={filters.fechaHasta} onChange={handleFilterChange} /></label>
             <label>Sesión<select name="sesion" value={filters.sesion} onChange={handleFilterChange}><option value="">Todas</option>{sesiones.map((s) => <option key={s._id} value={s._id}>{s.nombre}</option>)}</select></label>
@@ -308,37 +335,75 @@ function OperacionesPage() {
             <label>Objetivo precio<select name="objetivoPrecio" value={filters.objetivoPrecio} onChange={handleFilterChange}><option value="">Todos</option><option value="imbalance">Imbalance</option><option value="minimo">Mínimo</option><option value="maximo">Máximo</option></select></label>
             <label>Timeframe objetivo<select name="timeframeObjetivo" value={filters.timeframeObjetivo} onChange={handleFilterChange}><option value="">Todos</option>{timeframes.map((t) => <option key={t._id} value={t._id}>{t.nombre}</option>)}</select></label>
             <label>Alcanza target<select name="alcanzaTarget" value={filters.alcanzaTarget} onChange={handleFilterChange}><option value="">Todos</option><option value="true">Sí</option><option value="false">No</option></select></label>
+            <label>Operación tomada<select name="operacionTomada" value={filters.operacionTomada} onChange={handleFilterChange}><option value="">Todos</option><option value="true">Sí</option><option value="false">No</option></select></label>
+            <label>Resultado operación<select name="resultadoOperacion" value={filters.resultadoOperacion} onChange={handleFilterChange}><option value="">Todos</option><option value="ganada">Ganada</option><option value="breakEven">Break Even</option><option value="perdida">Perdida</option></select></label>
           </div>
+        </div>
+        <div className="panel operations-panel">
+          <h2 className="operations-title">Operaciones</h2>
+
+          {loading ? (
+            <p>Cargando...</p>
+          ) : (
+            <div className="operations-scroll">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Par</th>
+                    <th>Sesión</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredOperaciones.map((op) => (
+                    <tr key={op._id}>
+                      <td>
+                        {op.fechaHora
+                          ? new Date(op.fechaHora).toLocaleString('es-CO', {
+                              timeZone: 'America/Bogota'
+                            })
+                          : '—'}
+                      </td>
+
+                      <td>{op.par?.nombre || '—'}</td>
+
+                      <td>{op.sesion?.nombre || '—'}</td>
+
+                      <td>{op.descripcion}</td>
+
+                      <td className="actions-cell">
+                        <div className="row">
+                          <button onClick={() => navigate(`/operaciones/${op._id}`)}>
+                            Ver
+                          </button>
+
+                          <button
+                            className="secondary"
+                            onClick={() => handleEdit(op)}
+                          >
+                            Editar
+                          </button>
+
+                          <button
+                            className="danger"
+                            onClick={() => handleDelete(op._id)}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="panel">
-        <h2>Operaciones</h2>
-        {loading ? <p>Cargando...</p> : (
-          <table className="table">
-            <thead>
-              <tr><th>Fecha</th><th>Par</th><th>Sesión</th><th>Descripción</th><th>Acciones</th></tr>
-            </thead>
-            <tbody>
-              {filteredOperaciones.map((op) => (
-                <tr key={op._id}>
-                  <td>{new Date(op.fechaHora).toLocaleString()}</td>
-                  <td>{op.par?.nombre || '—'}</td>
-                  <td>{op.sesion?.nombre || '—'}</td>
-                  <td>{op.descripcion}</td>
-                  <td className="actions-cell">
-                    <div className="row">
-                      <button onClick={() => navigate(`/operaciones/${op._id}`)}>Ver</button>
-                      <button className="secondary" onClick={() => handleEdit(op)}>Editar</button>
-                      <button className="danger" onClick={() => handleDelete(op._id)}>Eliminar</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
     </div>
   );
 }

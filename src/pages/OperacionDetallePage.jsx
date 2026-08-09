@@ -15,7 +15,7 @@ function OperacionDetallePage() {
   const formatValue = (value) => {
     if (value === null || value === undefined || value === '') return '—';
     if (typeof value === 'boolean') return value ? 'Sí' : 'No';
-    if (value instanceof Date) return value.toLocaleString();
+    if (value instanceof Date) return value.toLocaleString('es-CO', { timeZone: 'America/Bogota' });
     return value;
   };
 
@@ -28,7 +28,7 @@ function OperacionDetallePage() {
       <Link to="/">← Volver</Link>
       <h2>Detalle de operación</h2>
       <div className="grid">
-        {renderField('Fecha y hora', operacion.fechaHora ? new Date(operacion.fechaHora).toLocaleString() : '')}
+        {renderField('Fecha y hora', operacion.fechaHora ? new Date(operacion.fechaHora).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) : '')}
         {renderField('Sesión', operacion.sesion?.nombre)}
         {renderField('Par', operacion.par?.nombre)}
         {renderField('Liquidez', operacion.liquidez)}

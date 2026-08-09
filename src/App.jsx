@@ -24,6 +24,10 @@ function App() {
             <span>📊</span>
             <span>Operaciones</span>
           </Link>
+          <Link className="sidebar-link" to="/?new=true">
+            <span>＋</span>
+            <span>Nueva operación</span>
+          </Link>
           <Link className="sidebar-link" to="/timeframes">
             <span>⏱️</span>
             <span>Timeframes</span>
