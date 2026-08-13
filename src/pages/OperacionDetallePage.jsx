@@ -47,10 +47,11 @@ function OperacionDetallePage() {
         {renderField('Ajuste stop loss pips', operacion.ajusteStopLossPips)}
         {renderField('Objetivo precio', operacion.objetivoPrecio)}
         {renderField('Timeframe objetivo', operacion.timeframeObjetivo?.nombre)}
-        {renderField('Alcanza target', operacion.alcanzaTarget)}
+        {renderField('Alcanza target', (operacion.alcanzaTarget === null || operacion.alcanzaTarget === undefined) ? 'Sin definir' : operacion.alcanzaTarget)}
         {renderField('Pips objetivo', operacion.pipsObjetivo)}
         {renderField('Porcentaje objetivo', operacion.porcentajeObjetivo)}
         {renderField('Resultado operación', operacion.resultadoOperacion)}
+        {renderField('Operación tomada', operacion.operacionTomada)}
       </div>
       {operacion.imagenUrl && <div style={{ marginTop: '16px' }}><img src={operacion.imagenUrl} alt="Captura de operación" /></div>}
     </div>
