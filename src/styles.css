@@ -159,9 +159,11 @@ a { color: #60a5fa; text-decoration: none; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
+  align-items: start;
 }
+
 .filter-grid label {
   min-width: 0;
   display: flex;
@@ -169,8 +171,9 @@ a { color: #60a5fa; text-decoration: none; }
   gap: 4px;
   font-size: 0.88rem;
 }
+
 .filter-grid label input,
-.filter-grid label select {
+.filter-grid label select{
   width: 100%;
   padding: 8px;
 }
@@ -191,6 +194,25 @@ button.danger { background: #dc2626; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .table { width: 100%; border-collapse: collapse; }
 .table th, .table td { padding: 10px; border-bottom: 1px solid #374151; text-align: left; }
+.resultado-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.resultado-ganada {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+.resultado-perdida {
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+}
+.resultado-break-even {
+  background: rgba(125, 211, 252, 0.18);
+  color: #7dd3fc;
+}
 img { max-width: 100%; border-radius: 8px; }
 
 @media (max-width: 768px) {

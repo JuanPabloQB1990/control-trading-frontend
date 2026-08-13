@@ -33,8 +33,10 @@ function OperacionDetallePage() {
         {renderField('Par', operacion.par?.nombre)}
         {renderField('Liquidez', operacion.liquidez)}
         {renderField('Liquidez en sesión', operacion.liquidezEnSesion)}
+        {renderField('Liquida última vela 4h', operacion.liquidaUltimaVela4h)}
         {renderField('Timeframe liquidez', operacion.timeframeLiquidez?.nombre)}
         {renderField('Quiebre tendencia entrada', operacion.quiebreTendenciaEntrada)}
+        {renderField('Timeframe imbalance entrada', operacion.timeframeImbalanceEntrada?.nombre)}
         {renderField('Descripción', operacion.descripcion)}
         {renderField('Pips stop loss', operacion.pipsStopLoss)}
         {renderField('Pips profit', operacion.pipsProfit)}
