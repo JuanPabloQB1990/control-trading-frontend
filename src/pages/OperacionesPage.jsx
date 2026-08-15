@@ -8,7 +8,7 @@ const defaultForm = {
   par: '',
   liquidez: 'imbalance',
   liquidezEnSesion: true,
-  liquidaUltimaVela4h: false,
+  liquidaUltimaVela2h: false,
   timeframeLiquidez: '',
   quiebreTendenciaEntrada: true,
   timeframeImbalanceEntrada: '',
@@ -46,7 +46,7 @@ function OperacionesPage() {
     par: '',
     liquidez: '',
     liquidezEnSesion: '',
-    liquidaUltimaVela4h: '',
+    liquidaUltimaVela2h: '',
     timeframeLiquidez: '',
     quiebreTendenciaEntrada: '',
     timeframeImbalanceEntrada: '',
@@ -123,7 +123,7 @@ function OperacionesPage() {
         }
       }
 
-      const payload = { ...form, imagenUrl: imageUrl, operacionTomada: Boolean(form.operacionTomada), liquidaUltimaVela4h: Boolean(form.liquidaUltimaVela4h), alcanzaTarget: form.alcanzaTarget === '' ? null : form.alcanzaTarget === 'true', pipsStopLoss: Number(form.pipsStopLoss), pipsProfit: Number(form.pipsProfit), riesgoPorcentaje: Number(form.riesgoPorcentaje), profitPorcentaje: Number(form.profitPorcentaje), pipsReliquidacion: Number(form.pipsReliquidacion), ajusteStopLossPips: Number(form.ajusteStopLossPips), pipsObjetivo: Number(form.pipsObjetivo), porcentajeObjetivo: Number(form.porcentajeObjetivo) };
+      const payload = { ...form, imagenUrl: imageUrl, operacionTomada: Boolean(form.operacionTomada), liquidaUltimaVela2h: Boolean(form.liquidaUltimaVela2h), alcanzaTarget: form.alcanzaTarget === '' ? null : form.alcanzaTarget === 'true', pipsStopLoss: Number(form.pipsStopLoss), pipsProfit: Number(form.pipsProfit), riesgoPorcentaje: Number(form.riesgoPorcentaje), profitPorcentaje: Number(form.profitPorcentaje), pipsReliquidacion: Number(form.pipsReliquidacion), ajusteStopLossPips: Number(form.ajusteStopLossPips), pipsObjetivo: Number(form.pipsObjetivo), porcentajeObjetivo: Number(form.porcentajeObjetivo) };
       if (editingId) {
         await api.put(`/operaciones/${editingId}`, payload);
       } else {
@@ -168,7 +168,7 @@ function OperacionesPage() {
       par: op.par?._id || op.par || '',
       liquidez: op.liquidez || 'imbalance',
       liquidezEnSesion: Boolean(op.liquidezEnSesion),
-      liquidaUltimaVela4h: Boolean(op.liquidaUltimaVela4h),
+      liquidaUltimaVela2h: Boolean(op.liquidaUltimaVela2h),
       timeframeLiquidez: op.timeframeLiquidez?._id || op.timeframeLiquidez || '',
       quiebreTendenciaEntrada: Boolean(op.quiebreTendenciaEntrada),
       timeframeImbalanceEntrada: op.timeframeImbalanceEntrada?._id || op.timeframeImbalanceEntrada || '',
@@ -218,7 +218,7 @@ function OperacionesPage() {
       if (filters.par && String(op.par?._id || op.par) !== String(filters.par)) return false;
       if (filters.liquidez && op.liquidez !== filters.liquidez) return false;
       if (filters.liquidezEnSesion !== '' && String(op.liquidezEnSesion) !== filters.liquidezEnSesion) return false;
-      if (filters.liquidaUltimaVela4h !== '' && String(op.liquidaUltimaVela4h) !== filters.liquidaUltimaVela4h) return false;
+      if (filters.liquidaUltimaVela2h !== '' && String(op.liquidaUltimaVela2h) !== filters.liquidaUltimaVela2h) return false;
       if (filters.timeframeLiquidez && String(op.timeframeLiquidez?._id || op.timeframeLiquidez) !== String(filters.timeframeLiquidez)) return false;
       if (filters.quiebreTendenciaEntrada !== '' && String(op.quiebreTendenciaEntrada) !== filters.quiebreTendenciaEntrada) return false;
       if (filters.timeframeImbalanceEntrada && String(op.timeframeImbalanceEntrada?._id || op.timeframeImbalanceEntrada) !== String(filters.timeframeImbalanceEntrada)) return false;
@@ -275,6 +275,14 @@ function OperacionesPage() {
     return acc;
   }, 0);
 
+  const porcentajeGanadas = dashboardStats.totalOperaciones > 0
+    ? (dashboardStats.ganadas / dashboardStats.totalOperaciones) * 100
+    : 0;
+
+  const porcentajeAlcanzoTarget = dashboardStats.totalOperaciones > 0
+    ? (dashboardStats.objetivosAlcanzados / dashboardStats.totalOperaciones) * 100
+    : 0;
+
   return (
     <div>
       {(showForm || editingId) && (
@@ -292,7 +300,7 @@ function OperacionesPage() {
                 <label>Par<select name="par" value={form.par} onChange={handleChange} required><option value="">Selecciona</option>{pares.map((p) => <option key={p._id} value={p._id}>{p.nombre}</option>)}</select></label>
                 <label>Liquidez<select name="liquidez" value={form.liquidez} onChange={handleChange}><option value="imbalance">Imbalance</option><option value="minimo">Mínimo</option><option value="maximo">Máximo</option></select></label>
                 <label>Liquidez en sesión<input name="liquidezEnSesion" type="checkbox" checked={form.liquidezEnSesion} onChange={handleChange} /></label>
-                <label>Liquida última vela 4h<input name="liquidaUltimaVela4h" type="checkbox" checked={form.liquidaUltimaVela4h} onChange={handleChange} /></label>
+                <label>Liquida última vela 2h<input name="liquidaUltimaVela2h" type="checkbox" checked={form.liquidaUltimaVela2h} onChange={handleChange} /></label>
                 <label>Timeframe liquidez<select name="timeframeLiquidez" value={form.timeframeLiquidez} onChange={handleChange} required><option value="">Selecciona</option>{timeframes.map((t) => <option key={t._id} value={t._id}>{t.nombre}</option>)}</select></label>
                 <div className="filter-dual-group">
                   <label>Quiebre tendencia entrada<input name="quiebreTendenciaEntrada" type="checkbox" checked={form.quiebreTendenciaEntrada} onChange={handleChange} /></label>
@@ -338,13 +346,17 @@ function OperacionesPage() {
           <h2 style={{ margin: '0 0 10px' }}>Dashboard</h2>
           <div className="dashboard-grid">
             <div className="metric-card">
-              <h3>Profits netos</h3>
+              <h3>Profits 1/2</h3>
               <p>{dashboardStats.totalProfitsNetos.toFixed(2)}%</p>
             </div>
             <div className="metric-card">
               <h3>Ganadas</h3>
               <p>{dashboardStats.ganadas}</p>
             </div>
+              <div className="metric-card">
+                <h3>% Ganadas</h3>
+                <p>{porcentajeGanadas.toFixed(2)}%</p>
+              </div>
             <div className="metric-card">
               <h3>Perdidas</h3>
               <p>{dashboardStats.perdidas}</p>
@@ -357,8 +369,12 @@ function OperacionesPage() {
               <h3>Objetivos alcanzados</h3>
               <p>{dashboardStats.objetivosAlcanzados}</p>
             </div>
+              <div className="metric-card">
+                <h3>% Objetivos alcanzados</h3>
+                <p>{porcentajeAlcanzoTarget.toFixed(2)}%</p>
+              </div>
             <div className="metric-card">
-              <h3>Porcentaje objetivos</h3>
+              <h3>Profits objetivos</h3>
               <p>{porcentajeObjetivos.toFixed(2)}%</p>
             </div>
             <div className="metric-card">
@@ -377,7 +393,7 @@ function OperacionesPage() {
             <label>Par<select name="par" value={filters.par} onChange={handleFilterChange}><option value="">Todos</option>{pares.map((p) => <option key={p._id} value={p._id}>{p.nombre}</option>)}</select></label>
             <label>Liquidez<select name="liquidez" value={filters.liquidez} onChange={handleFilterChange}><option value="">Todas</option><option value="imbalance">Imbalance</option><option value="minimo">Mínimo</option><option value="maximo">Máximo</option></select></label>
             <label>Liquidez en sesión<select name="liquidezEnSesion" value={filters.liquidezEnSesion} onChange={handleFilterChange}><option value="">Todas</option><option value="true">Sí</option><option value="false">No</option></select></label>
-            <label>Liquida última vela 4h<select name="liquidaUltimaVela4h" value={filters.liquidaUltimaVela4h} onChange={handleFilterChange}><option value="">Todos</option><option value="true">Sí</option><option value="false">No</option></select></label>
+            <label>Liquida última vela 2h<select name="liquidaUltimaVela2h" value={filters.liquidaUltimaVela2h} onChange={handleFilterChange}><option value="">Todos</option><option value="true">Sí</option><option value="false">No</option></select></label>
             <label>Timeframe liquidez<select name="timeframeLiquidez" value={filters.timeframeLiquidez} onChange={handleFilterChange}><option value="">Todos</option>{timeframes.map((t) => <option key={t._id} value={t._id}>{t.nombre}</option>)}</select></label>
             <label>Quiebre tendencia entrada<select name="quiebreTendenciaEntrada" value={filters.quiebreTendenciaEntrada} onChange={handleFilterChange}><option value="">Todos</option><option value="true">Sí</option><option value="false">No</option></select></label>
             <label>TF imbalance entrada<select name="timeframeImbalanceEntrada" value={filters.timeframeImbalanceEntrada} onChange={handleFilterChange}><option value="">Todos</option>{timeframes.map((t) => <option key={t._id} value={t._id}>{t.nombre}</option>)}</select></label>
