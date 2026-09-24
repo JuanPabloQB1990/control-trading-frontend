@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 function OperacionDetallePage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [operacion, setOperacion] = useState(null);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ function OperacionDetallePage() {
 
   return (
     <div className="panel">
-      <Link to="/">← Volver</Link>
+      <button type="button" className="secondary" onClick={() => navigate(-1)}>← Volver</button>
       <h2>Detalle de operación</h2>
       <div className="grid">
         {renderField('Fecha y hora', operacion.fechaHora ? new Date(operacion.fechaHora).toLocaleString('es-CO', { timeZone: 'America/Bogota' }) : '')}

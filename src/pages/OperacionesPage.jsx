@@ -30,6 +30,37 @@ const defaultForm = {
   imagenUrl: ''
 };
 
+const formatLiquidez = (value) => {
+  if (!value) return '—';
+
+  const map = {
+    imbalance: 'Imbalance',
+    minimo: 'Mínimo',
+    maximo: 'Máximo'
+  };
+
+  return map[value] || value;
+};
+
+const defaultFilters = {
+  fechaDesde: '',
+  fechaHasta: '',
+  sesion: '',
+  par: '',
+  liquidez: '',
+  liquidezEnSesion: '',
+  liquidaUltimaVela2h: '',
+  timeframeLiquidez: '',
+  quiebreTendenciaEntrada: '',
+  timeframeImbalanceEntrada: '',
+  reliquida: '',
+  objetivoPrecio: '',
+  timeframeObjetivo: '',
+  alcanzaTarget: '',
+  operacionTomada: '',
+  resultadoOperacion: ''
+};
+
 function OperacionesPage() {
   const navigate = useNavigate();
   const [operaciones, setOperaciones] = useState([]);
@@ -39,23 +70,18 @@ function OperacionesPage() {
   const [form, setForm] = useState(defaultForm);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [filters, setFilters] = useState({
-    fechaDesde: '',
-    fechaHasta: '',
-    sesion: '',
-    par: '',
-    liquidez: '',
-    liquidezEnSesion: '',
-    liquidaUltimaVela2h: '',
-    timeframeLiquidez: '',
-    quiebreTendenciaEntrada: '',
-    timeframeImbalanceEntrada: '',
-    reliquida: '',
-    objetivoPrecio: '',
-    timeframeObjetivo: '',
-    alcanzaTarget: '',
-    operacionTomada: '',
-    resultadoOperacion: ''
+  const [filters, setFilters] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const restored = { ...defaultFilters };
+
+    Object.keys(defaultFilters).forEach((key) => {
+      const value = params.get(key);
+      if (value !== null) {
+        restored[key] = value;
+      }
+    });
+
+    return restored;
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -95,6 +121,21 @@ function OperacionesPage() {
     }
   }, [searchParams, setSearchParams]);
 
+  useEffect(() => {
+    const restored = { ...defaultFilters };
+    Object.keys(defaultFilters).forEach((key) => {
+      const value = searchParams.get(key);
+      if (value !== null) {
+        restored[key] = value;
+      }
+    });
+
+    setFilters((prev) => {
+      const isSame = Object.keys(defaultFilters).every((key) => prev[key] === restored[key]);
+      return isSame ? prev : restored;
+    });
+  }, [searchParams]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
@@ -102,7 +143,21 @@ function OperacionesPage() {
 
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    const nextValue = type === 'checkbox' ? checked : value;
+
+    setFilters((prev) => {
+      const nextFilters = { ...prev, [name]: nextValue };
+      const params = new URLSearchParams();
+
+      Object.entries(nextFilters).forEach(([key, val]) => {
+        if (val !== '' && val !== null && val !== undefined) {
+          params.set(key, String(val));
+        }
+      });
+
+      setSearchParams(params, { replace: true });
+      return nextFilters;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -418,6 +473,8 @@ function OperacionesPage() {
                     <th>Fecha</th>
                     <th>Par</th>
                     <th>Sesión</th>
+                    <th>Liquidez</th>
+                    <th>Timeframe liquidez</th>
                     <th>Descripción</th>
                     <th>Resultado</th>
                     <th>Acciones</th>
@@ -439,6 +496,10 @@ function OperacionesPage() {
 
                       <td>{op.sesion?.nombre || '—'}</td>
 
+                      <td>{formatLiquidez(op.liquidez)}</td>
+
+                      <td>{op.timeframeLiquidez?.nombre || '—'}</td>
+
                       <td>{op.descripcion}</td>
 
                       <td>
@@ -455,7 +516,7 @@ function OperacionesPage() {
 
                       <td className="actions-cell">
                         <div className="row">
-                          <button onClick={() => navigate(`/operaciones/${op._id}`)}>
+                          <button onClick={() => navigate(`/operaciones/${op._id}${window.location.search}`)}>
                             Ver
                           </button>
 
