@@ -5,6 +5,7 @@ import OperacionDetallePage from './pages/OperacionDetallePage';
 import TimeframesPage from './pages/TimeframesPage';
 import SesionesPage from './pages/SesionesPage';
 import ParesPage from './pages/ParesPage';
+import ObjetivosPage from './pages/ObjetivosPage';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -40,6 +41,10 @@ function App() {
             <span>💱</span>
             <span>Pares</span>
           </Link>
+          <Link className="sidebar-link" to="/objetivos">
+            <span>📈</span>
+            <span>Objetivos</span>
+          </Link>
         </nav>
       </aside>
 
@@ -52,6 +57,7 @@ function App() {
             <Route path="/timeframes" element={<TimeframesPage />} />
             <Route path="/sesiones" element={<SesionesPage />} />
             <Route path="/pares" element={<ParesPage />} />
+            <Route path="/objetivos" element={<ObjetivosPage />} />
           </Routes>
         </main>
       </div>

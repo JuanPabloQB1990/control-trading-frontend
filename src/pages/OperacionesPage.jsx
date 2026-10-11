@@ -42,6 +42,11 @@ const formatLiquidez = (value) => {
   return map[value] || value;
 };
 
+const formatAlcanzaTarget = (value) => {
+  if (value === undefined || value === null || value === '') return 'Sin definir';
+  return value ? 'Sí' : 'No';
+};
+
 const defaultFilters = {
   fechaDesde: '',
   fechaHasta: '',
@@ -476,6 +481,9 @@ function OperacionesPage() {
                     <th>Liquidez</th>
                     <th>Timeframe liquidez</th>
                     <th>Descripción</th>
+                    <th>Alcanza target</th>
+                    <th>Pips objetivo</th>
+                    <th>Porcentaje objetivo</th>
                     <th>Resultado</th>
                     <th>Acciones</th>
                   </tr>
@@ -501,6 +509,20 @@ function OperacionesPage() {
                       <td>{op.timeframeLiquidez?.nombre || '—'}</td>
 
                       <td>{op.descripcion}</td>
+
+                      <td>
+                        {op.alcanzaTarget === true ? (
+                          <span className="resultado-badge resultado-ganada">Sí</span>
+                        ) : op.alcanzaTarget === false ? (
+                          <span className="resultado-badge resultado-perdida">No</span>
+                        ) : (
+                          <span className="resultado-badge resultado-break-even">Sin definir</span>
+                        )}
+                      </td>
+
+                      <td>{op.pipsObjetivo ?? '—'}</td>
+
+                      <td>{op.porcentajeObjetivo ?? '—'}</td>
 
                       <td>
                         {op.resultadoOperacion === 'ganada' ? (
