@@ -47,6 +47,11 @@ const formatAlcanzaTarget = (value) => {
   return value ? 'Sí' : 'No';
 };
 
+const formatNumericValue = (value) => {
+  if (value === undefined || value === null || value === '') return '—';
+  return value;
+};
+
 const defaultFilters = {
   fechaDesde: '',
   fechaHasta: '',
@@ -480,7 +485,9 @@ function OperacionesPage() {
                     <th>Sesión</th>
                     <th>Liquidez</th>
                     <th>Timeframe liquidez</th>
-                    <th>Descripción</th>
+                    <th>Pips stop loss</th>
+                    <th>Pips profit</th>
+                    <th>Pips reliquidación</th>
                     <th>Alcanza target</th>
                     <th>Pips objetivo</th>
                     <th>Porcentaje objetivo</th>
@@ -508,7 +515,11 @@ function OperacionesPage() {
 
                       <td>{op.timeframeLiquidez?.nombre || '—'}</td>
 
-                      <td>{op.descripcion}</td>
+                      <td>{formatNumericValue(op.pipsStopLoss)}</td>
+
+                      <td>{formatNumericValue(op.pipsProfit)}</td>
+
+                      <td>{formatNumericValue(op.pipsReliquidacion)}</td>
 
                       <td>
                         {op.alcanzaTarget === true ? (
@@ -520,9 +531,9 @@ function OperacionesPage() {
                         )}
                       </td>
 
-                      <td>{op.pipsObjetivo ?? '—'}</td>
+                      <td>{formatNumericValue(op.pipsObjetivo)}</td>
 
-                      <td>{op.porcentajeObjetivo ?? '—'}</td>
+                      <td>{formatNumericValue(op.porcentajeObjetivo)}</td>
 
                       <td>
                         {op.resultadoOperacion === 'ganada' ? (
