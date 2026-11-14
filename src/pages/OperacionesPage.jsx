@@ -27,7 +27,8 @@ const defaultForm = {
   porcentajeObjetivo: '',
   resultadoOperacion: '',
   operacionTomada: false,
-  imagenUrl: ''
+  imagenUrl: '',
+  imagenPublicId: ''
 };
 
 const formatLiquidez = (value) => {
@@ -176,19 +177,22 @@ function OperacionesPage() {
 
     try {
       let imageUrl = form.imagenUrl;
+      let imagePublicId = form.imagenPublicId;
       if (imageFile) {
         try {
           const formData = new FormData();
           formData.append('image', imageFile);
           const uploadRes = await api.post('/uploads', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
           imageUrl = uploadRes.data.imageUrl;
+          imagePublicId = uploadRes.data.publicId || '';
         } catch (uploadErr) {
           console.error('Image upload failed:', uploadErr);
           imageUrl = '';
+          imagePublicId = '';
         }
       }
 
-      const payload = { ...form, imagenUrl: imageUrl, operacionTomada: Boolean(form.operacionTomada), liquidaUltimaVela2h: Boolean(form.liquidaUltimaVela2h), alcanzaTarget: form.alcanzaTarget === '' ? null : form.alcanzaTarget === 'true', pipsStopLoss: Number(form.pipsStopLoss), pipsProfit: Number(form.pipsProfit), riesgoPorcentaje: Number(form.riesgoPorcentaje), profitPorcentaje: Number(form.profitPorcentaje), pipsReliquidacion: Number(form.pipsReliquidacion), ajusteStopLossPips: Number(form.ajusteStopLossPips), pipsObjetivo: Number(form.pipsObjetivo), porcentajeObjetivo: Number(form.porcentajeObjetivo) };
+      const payload = { ...form, imagenUrl: imageUrl, imagenPublicId: imagePublicId, operacionTomada: Boolean(form.operacionTomada), liquidaUltimaVela2h: Boolean(form.liquidaUltimaVela2h), alcanzaTarget: form.alcanzaTarget === '' ? null : form.alcanzaTarget === 'true', pipsStopLoss: Number(form.pipsStopLoss), pipsProfit: Number(form.pipsProfit), riesgoPorcentaje: Number(form.riesgoPorcentaje), profitPorcentaje: Number(form.profitPorcentaje), pipsReliquidacion: Number(form.pipsReliquidacion), ajusteStopLossPips: Number(form.ajusteStopLossPips), pipsObjetivo: Number(form.pipsObjetivo), porcentajeObjetivo: Number(form.porcentajeObjetivo) };
       if (editingId) {
         await api.put(`/operaciones/${editingId}`, payload);
       } else {
@@ -252,7 +256,8 @@ function OperacionesPage() {
       porcentajeObjetivo: op.porcentajeObjetivo || '',
       resultadoOperacion: op.resultadoOperacion || '',
       operacionTomada: Boolean(op.operacionTomada),
-      imagenUrl: op.imagenUrl || ''
+      imagenUrl: op.imagenUrl || '',
+      imagenPublicId: op.imagenPublicId || ''
     });
   };
 
